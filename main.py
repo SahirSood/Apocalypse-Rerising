@@ -97,6 +97,8 @@ def main():
 
     bullets = []
 
+    pygame.mouse.set_visible(False)
+
     clock = pygame.time.Clock()
     run = True
     while run:
