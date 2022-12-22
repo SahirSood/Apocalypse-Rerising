@@ -76,7 +76,7 @@ class Zombie(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (ZOMBIE_HEIGHT,ZOMBIE_WIDTH))
         self.rect = self.image.get_rect(center=(pos_x,pos_y))
 
-        self.x = pos_xsssssssss
+        self.x = pos_x
         self.y = pos_y
     def update(self, target_x, target_y):
         angle = math.atan2(target_y-self.y, target_x-self.x)
