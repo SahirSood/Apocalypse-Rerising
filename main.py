@@ -18,18 +18,23 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.image.load(os.path.join('Biker Idle', 'tile000.png'))
         self.image = pygame.transform.scale(self.image,(height,width))
+        self.orig_image =self.image
         self.rect = self.image.get_rect(center=(pos_x,pos_y))
-
+        self.direction = "right"
     def update(self, keys_pressed):
         if keys_pressed[pygame.K_w] and self.rect.y - VEL > 0: #move forwawrd
             self.rect.y  -= VEL    
         if keys_pressed[pygame.K_a] and self.rect.x - VEL > 0: #move left
             self.rect.x  -= VEL
+            self.image = pygame.transform.flip(self.orig_image, True, False)
+            self.direction = "left"
+
         if keys_pressed[pygame.K_s] and self.rect.y + VEL + self.rect.height < HEIGHT - 18: #move back
             self.rect.y   += VEL
         if keys_pressed[pygame.K_d] and self.rect.x + VEL + self.rect.width < WIDTH: #move right
             self.rect.x  += VEL
-
+            self.image = self.orig_image
+            self.direction = "right"
 
 class Gun(pygame.sprite.Sprite):
     def __init__(self,pos_x,pos_y):
@@ -67,6 +72,7 @@ class Bullet(pygame.sprite.Sprite):
             
         self.rect.x = int(self.x)
         self.rect.y = int(self.y)
+        
             
         
 class Zombie(pygame.sprite.Sprite):
@@ -78,16 +84,23 @@ class Zombie(pygame.sprite.Sprite):
 
         self.x = pos_x
         self.y = pos_y
+        self.location = "right"
     def update(self, target_x, target_y):
+       
         angle = math.atan2(target_y-self.y, target_x-self.x)
-        self.dx = math.cos(angle)
-        self.dy = math.sin(angle)
+        self.dx = math.cos(angle)*.5
+        self.dy = math.sin(angle)*.5
         
         self.x += self.dx
         self.y += self.dy
         self.rect.x = int(self.x)
         self.rect.y = int(self.y)
 
+
+        if self.rect.x < WIDTH/2:
+            self.location = 'left'
+        else:
+            self.location = 'right'
 
 WIDTH, HEIGHT = 500,500
 
@@ -142,7 +155,15 @@ def main():
                 run = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = pygame.mouse.get_pos()
-                bullet_group.add(Bullet(gun.rect.centerx, gun.rect.centery ,mx,my))
+                x_diff = player.rect.x - mx
+                y_diff = player.rect.y-my
+                
+                angle = math.degrees(math.atan2(-y_diff, x_diff)) +180
+                if (player.direction == "right" and (angle <=90 or angle >= 270)) or (player.direction == "left" and 90 < angle <270):
+                    bullet_group.add(Bullet(gun.rect.centerx, gun.rect.centery ,mx,my))
+                    
+
+                
         keys_pressed = pygame.key.get_pressed()
         if keys_pressed[pygame.K_z]:
             side = random.choice(sides)
@@ -164,7 +185,11 @@ def main():
         player_group.update(keys_pressed)
         gun_group.update() 
         bullet_group.update()
-        zombie_group.update(player.rect.x, player.rect.y)       
+
+
+        for zombie in zombie_group:
+            if zombie.location != player.direction:
+                zombie.update(player.rect.x, player.rect.y)       
 
         for bullet in bullet_group:
             enemy_hits = pygame.sprite.spritecollide(bullet, zombie_group, False)
