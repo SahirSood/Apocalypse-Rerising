@@ -13,6 +13,8 @@ PLAYER_WIDTH, PLAYER_HEIGHT = 62,50
 ZOMBIE_WIDTH, ZOMBIE_HEIGHT = 50, 50
 GUN_WIDTH, GUN_HEIGHT = 10, 4
 
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, width, height,pos_x,pos_y):
         super().__init__()
@@ -35,6 +37,9 @@ class Player(pygame.sprite.Sprite):
             self.rect.x  += VEL
             self.image = self.orig_image
             self.direction = "right"
+player = Player(PLAYER_HEIGHT, PLAYER_WIDTH, 300, 100)
+player_group = pygame.sprite.Group()
+player_group.add(player)           
 
 class Gun(pygame.sprite.Sprite):
     def __init__(self,pos_x,pos_y):
@@ -53,6 +58,9 @@ class Gun(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.orig_image, angle)
 
         self.rect = self.image.get_rect(center=player.rect.center)
+
+        if player.direction == 'left':
+            pygame.transform.flip(self.orig_image, True, False)
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self,pos_x ,pos_y, targetx, targety):
@@ -73,8 +81,10 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.x = int(self.x)
         self.rect.y = int(self.y)
         
-            
-        
+
+
+zombie_group = pygame.sprite.Group()
+
 class Zombie(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__()
@@ -84,23 +94,27 @@ class Zombie(pygame.sprite.Sprite):
 
         self.x = pos_x
         self.y = pos_y
-        self.location = "right"
-    def update(self, target_x, target_y):
-       
-        angle = math.atan2(target_y-self.y, target_x-self.x)
-        self.dx = math.cos(angle)*.5
-        self.dy = math.sin(angle)*.5
-        
-        self.x += self.dx
-        self.y += self.dy
-        self.rect.x = int(self.x)
-        self.rect.y = int(self.y)
-
-
-        if self.rect.x < WIDTH/2:
+        if self.rect.x < player.rect.x:
             self.location = 'left'
         else:
             self.location = 'right'
+    def update(self, target_x, target_y):
+       
+        if self.location != player.direction:
+            angle = math.atan2(target_y-self.y, target_x-self.x)
+            self.dx = math.cos(angle)*.5
+            self.dy = math.sin(angle)*.5
+            
+            self.x += self.dx
+            self.y += self.dy
+            self.rect.x = int(self.x)
+            self.rect.y = int(self.y)
+
+        if self.rect.x < player.rect.x:
+            self.location = 'left'
+        else:
+            self.location = 'right'
+    
 
 WIDTH, HEIGHT = 500,500
 
@@ -116,9 +130,7 @@ CROSSHAIR_IMAGE = pygame.image.load(
 
 cursor_rect = CROSSHAIR_IMAGE.get_rect()
 
-player = Player(PLAYER_HEIGHT, PLAYER_WIDTH, 300, 100)
-player_group = pygame.sprite.Group()
-player_group.add(player)
+
 
 gun = Gun(300, 100) 
 gun_group = pygame.sprite.Group()
@@ -126,7 +138,6 @@ gun_group.add(gun)
 
 bullet_group = pygame.sprite.Group()
 
-zombie_group = pygame.sprite.Group()
 
 def draw_window():
     WIN.fill(PURPLE)
@@ -185,12 +196,8 @@ def main():
         player_group.update(keys_pressed)
         gun_group.update() 
         bullet_group.update()
-
-
-        for zombie in zombie_group:
-            if zombie.location != player.direction:
-                zombie.update(player.rect.x, player.rect.y)       
-
+        zombie_group.update(player.rect.x, player.rect.y)
+        
         for bullet in bullet_group:
             enemy_hits = pygame.sprite.spritecollide(bullet, zombie_group, False)
             for zombie in enemy_hits:
@@ -200,7 +207,6 @@ def main():
             for players in player_hit:
                 players.kill()
                 
-
 
 
         if not player_group:
