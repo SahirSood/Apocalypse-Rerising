@@ -59,8 +59,8 @@ class Gun(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect(center=player.rect.center)
 
-        if player.direction == 'left':
-            pygame.transform.flip(self.orig_image, True, False)
+        # if player.direction == 'left':
+        #     self.image = pygame.transform.flip(self.image, False, True)
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self,pos_x ,pos_y, targetx, targety):
@@ -90,6 +90,7 @@ class Zombie(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.image.load(os.path.join('zombiefiles', 'male', 'Idle (1).png')) 
         self.image = pygame.transform.scale(self.image, (ZOMBIE_HEIGHT,ZOMBIE_WIDTH))
+        self.orig_image = self.image
         self.rect = self.image.get_rect(center=(pos_x,pos_y))
 
         self.x = pos_x
@@ -104,7 +105,10 @@ class Zombie(pygame.sprite.Sprite):
             angle = math.atan2(target_y-self.y, target_x-self.x)
             self.dx = math.cos(angle)*.5
             self.dy = math.sin(angle)*.5
-            
+            if self.dx < 0:
+                self.image = pygame.transform.flip(self.orig_image, True, False)
+            elif self.dx>0:
+                self.image = self.orig_image
             self.x += self.dx
             self.y += self.dy
             self.rect.x = int(self.x)
