@@ -40,7 +40,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(pos_x,pos_y))
         self.direction = "right"
 
-        self.moving = False
+        # self.moving = False
     def update(self, keys_pressed):
         self.moving = False
         self.current_sprite +=0.1
@@ -63,7 +63,7 @@ class Player(pygame.sprite.Sprite):
             
             if self.current_move_sprite >= len(self.move_sprite):
                 self.current_move_sprite = 0   
-            self.moving = True
+            # self.moving = True
 
         if keys_pressed[pygame.K_a] and self.rect.x - VEL > 0: #move left
             self.rect.x  -= VEL
@@ -72,7 +72,7 @@ class Player(pygame.sprite.Sprite):
             self.current_move_sprite +=0.1
             if self.current_move_sprite >= len(self.move_sprite):
                 self.current_move_sprite = 0   
-            self.moving = True
+            # self.moving = True
 
         if keys_pressed[pygame.K_s] and self.rect.y + VEL + self.rect.height < HEIGHT - 18: #move back
             self.rect.y   += VEL
@@ -83,7 +83,7 @@ class Player(pygame.sprite.Sprite):
             self.current_move_sprite +=0.1
             if self.current_move_sprite >= len(self.move_sprite):
                 self.current_move_sprite = 0
-            self.moving = True
+            # self.moving = True
 
         if keys_pressed[pygame.K_d] and self.rect.x + VEL + self.rect.width < WIDTH: #move right
             self.rect.x  += VEL
@@ -92,7 +92,7 @@ class Player(pygame.sprite.Sprite):
             self.current_move_sprite +=0.1
             if self.current_move_sprite >= len(self.move_sprite):
                 self.current_move_sprite = 0
-            self.moving = True
+            # self.moving = True
         
 player = Player(PLAYER_HEIGHT, PLAYER_WIDTH, 300, 100)
 player_group = pygame.sprite.Group()
@@ -107,23 +107,33 @@ class Gun(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(pos_x,pos_y))
 
     def update(self):
-        
-        if player.moving == False:
-            self.image = self.orig_image.set_alpha(0)
-            print("not moving")
-        else:
-            x_mouse = pygame.mouse.get_pos()[0]
-            y_mouse = pygame.mouse.get_pos()[1]
-            x_diff = self.rect.x - x_mouse
-            y_diff = self.rect.y-y_mouse
-            
-            angle = math.degrees(math.atan2(-y_diff, x_diff)) - 180
-            if player.direction == 'left':
-                self.image = pygame.transform.rotate(self.flip_orig_image, angle)
-            else:
-                self.image = pygame.transform.rotate(self.orig_image, angle)
 
+        x_mouse = pygame.mouse.get_pos()[0]
+        y_mouse = pygame.mouse.get_pos()[1]
+        x_diff = self.rect.x - x_mouse
+        y_diff = self.rect.y-y_mouse
+        
+        angle = math.degrees(math.atan2(-y_diff, x_diff)) - 180
+        self.image = pygame.transform.rotate(self.flip_orig_image, angle)
+        self.image = pygame.transform.rotate(self.orig_image, angle)
         self.rect = self.image.get_rect(center=player.rect.center)
+
+        # if player.moving == False:
+        #     self.image = self.orig_image.set_alpha(0)
+        #     print("not moving")
+        # else:
+        #     x_mouse = pygame.mouse.get_pos()[0]
+        #     y_mouse = pygame.mouse.get_pos()[1]
+        #     x_diff = self.rect.x - x_mouse
+        #     y_diff = self.rect.y-y_mouse
+            
+        #     angle = math.degrees(math.atan2(-y_diff, x_diff)) - 180
+        #     if player.direction == 'left':
+        #         self.image = pygame.transform.rotate(self.flip_orig_image, angle)
+        #     else:
+        #         self.image = pygame.transform.rotate(self.orig_image, angle)
+
+        # self.rect = self.image.get_rect(center=player.rect.center)
 
         # if player.direction == 'left':
         #     self.image = pygame.transform.flip(self.image, False, True)
