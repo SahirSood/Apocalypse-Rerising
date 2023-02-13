@@ -195,6 +195,10 @@ class Zombie(pygame.sprite.Sprite):
         else:
             self.location = 'right'
     
+    
+    
+    
+
 
 WIDTH, HEIGHT = 500,500
 
@@ -229,6 +233,29 @@ def draw_window():
     WIN.blit(CROSSHAIR_IMAGE, cursor_rect)
     pygame.display.update()
 
+def level_builder(level):
+    for i in range(level):
+        side = random.choice(sides)
+        if side == 'top':
+            zy = 0
+            zx = random.randrange(WIDTH)
+        elif side == 'bottom':
+            zy = HEIGHT
+            zx =random.randrange(WIDTH)
+        elif side == 'left':
+            zy = random.randrange(HEIGHT)
+            zx = 0
+        elif side == 'right':
+            zy = random.randrange(HEIGHT)
+            zx = WIDTH
+        zombie_group.add(Zombie(zx, zy))
+    
+    
+    
+    
+
+
+
 
 def main():
 
@@ -238,7 +265,18 @@ def main():
 
     clock = pygame.time.Clock()
     run = True
+    
+    prev_level = 0
+    cur_level = 1
     while run:
+    
+        
+        if cur_level != prev_level:
+            level_builder(cur_level)
+            prev_level = cur_level #cur level now is the same as previous level so this if statement will never be called again
+            
+        
+        
         cursor_rect.center = pygame.mouse.get_pos()
         clock.tick(FPS)
         for event in pygame.event.get():
@@ -286,12 +324,35 @@ def main():
             player_hit = pygame.sprite.spritecollide(zombie, player_group, False)
             for players in player_hit:
                 players.kill()
+       
+        if len(zombie_group) == 0:
+            cur_level+=1
+            prev_level+=1
                 
 
 
         if not player_group:
             run = False
+            
+        if len(zombie_group) == 0: # when all zombies dead we go to next level
+            cur_level+=1 # add one to cur level so it is again not equal to prevlevel and we call the level builder againw
+        
+        if len(zombie_group) !=0 and len(bullet_group)>=cur_level:
+            #need code here so we only quit once all bullets in bullet class leaves the screen
+            onein = False
+            for bullet in bullet_group:
+                if bullet.rect.x < WIDTH or bullet.rect.x>0 or bullet.rect.y>0 or bullet.rect.y<HEIGHT:
+                    onein = True
+                    break
+                
+            if onein == False:
+                pygame.quit()
+        print(len(bullet_group))
+        print(cur_level)
         draw_window()
+        
+        
+    
 
     pygame.quit()
 
